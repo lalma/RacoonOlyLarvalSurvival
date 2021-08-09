@@ -46,7 +46,7 @@ legend("topright" , c("CI20-14C","CI5-14C","DB-14C","PW-14C", "CI20-20C", "CI5-2
 ggsurvplot(sf, data=OlyLarvaeKMforR, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
            legend.labs=c("CI20-14C","CI5-14C","DB-14C","PW-14C", "CI20-20C", "CI5-20C", "DB-20C", "PW-20C"),legend.title="Treatment", 
            palette =  c('darkgreen', 'blue4', 'darkred', 'darkgoldenrod', '#33CC66','steelblue','red','darkgoldenrod1'),   
-           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3,  ggtheme = theme_bw() +  theme(
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.y.by=.2, break.time.by = 3,  ggtheme = theme_bw() +  theme(
                    panel.grid.major.y = element_blank(),
                    panel.grid.minor.y = element_blank(),  
                    panel.grid.major.x = element_blank(),

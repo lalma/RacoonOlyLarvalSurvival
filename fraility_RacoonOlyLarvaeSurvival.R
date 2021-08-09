@@ -9,7 +9,7 @@ library(readxl)
 
 
 # Select dataset, import my dataset here, has the same headings as pauls dataset for simplicity
-OlyLarvaeKMforR <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/OlyLarvaeKMforR.xlsx")
+OlyLarvaeKMforR <- OlyLarvaeKMforR <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/OlyLarvaeKMforR.xlsx")
 #  dataset is d
 d <- OlyLarvaeKMforR
 View(d)
@@ -107,37 +107,38 @@ summary(mLogLikeIIII)
 
 #indentify the model frailty distribution with the maxium likelihood
 #since forloop was not used, created dataset with all distributions and their logLike values to enter into bestDist
-dLike <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/dLike.xlsx")
+dLike <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/dLike.xlsx")
 bestDist <- dLike$dist[dLike$logLike == max(dLike$logLike)]
 #best fit was nonCenGamma
 
-# fit model with Group random effect using best fit frailty distribution
+# fit model with Group random effect using best fit frailty distribu1tion
 #will take a while to run- start 4:15 7-21-21, finish by morning 7-21-21
 fme <- emfrail(surv ~ Treatment + Location+ cluster(Group), 
                distribution = emfrail_dist(dist = frailtyDist$dist[frailtyDist$name == bestDist],
                                            pvfm = frailtyDist$m[frailtyDist$name == bestDist] ),
-               data = d)
+#Both the Commenges-Andersen test for heterogeneity and the one-sided likelihood ratio test deems the random effect highly significant.
+#The Commenges-Andersen score test for heterogeneity (Commenges and Andersen 1995) is implemented in frailtyEM.
 summary(fme)
-#not sure how to read this summary...need help here.
-#are we looking for the p-values in the Fit summary to be <0.05?
-#Fit summary:
-#  Commenges-Andersen test for heterogeneity: p-val  0.335 
-#no-frailty Log-likelihood: -9504.875 
-#Log-likelihood: -9504.38 
+#Score test for heterogeneity: p-val 0.335
+#Commenges-Andersen test for heterogeneity: p-val  0.335 
+#If the null hypothesis of no unobserved heterogeneity is not rejected, it might be preferable to employ simpler Cox-type models.
 #LRT: 1/2 * pchisq(0.991), p-val 0.16
+#which to report in paper?
 
 #frailty plot - shows variation in frailty terms
 autoplot(fme, type = "frail")
+#By default, the predict function creates predictions for each row of newdata or for each value of autopiolt separately
+#newdata = data.frame(Treatment= unique(d$Treatment), Location = unique(d$Location))
+
 #new data of treatments for survival plots
 #dNew <- data.frame(Treatment = unique(d$Treatment)
 
 #made a new matrix called dNew, which has the unique treatments and locations. 
 #not sure if this is the correct format. need help here.
-#this data sheet has one row called Treatment and one row called Location
-dNew <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/dNew.xlsx")
+#this data sheet has one row called Treatment and one row called Location, 8 rows, shows all possible combos
+dNew <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/dNew.xlsx")
 
-#predictions (survival probabilities) of treatmeents 
-#pred has 2 datasets, each are 12x15
+#predictions (survival probabilities) of treatments 
 pred <- predict(fme, newdata = dNew, conf_int = "adjusted")
 
 #create a data frame of the prections for plotting all the treatment curves
@@ -145,11 +146,12 @@ pred <- predict(fme, newdata = dNew, conf_int = "adjusted")
 #need help here. not sure hot to integrate both response veriables into this loop
 dPlot <- NULL
 for(i in 1:length(pred)){
-  dLike <- pred[[i]] %>%
+  dTemp <- pred[[i]] %>%
     mutate(Treatment = unique(d$Treatment)[i])
   dPlot <- rbind(dPlot, dTemp)
 }
 
+View(dPlot)
 # plot curve
 ggplot(dPlot, aes(time, survival_m)) +
   geom_step(aes(color = Treatment)) +
