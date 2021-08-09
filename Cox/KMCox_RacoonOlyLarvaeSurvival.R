@@ -31,7 +31,7 @@ plot(sf, xlab="Larval Age",
 
 #Plot with breaktime by = # of days, palette=number of treatments listed colors
 fontsize<-20
-pCox <- ggsurvplot(sf, risk.table = FALSE, pval = FALSE, conf.int = TRUE,
+pCox <- ggsurvplot(sf, data=OlyLarvaeKMforR, risk.table = FALSE, pval = FALSE, conf.int = TRUE,
                    font.main = fontSize, font.x =  fontSize, font.y = fontSize, 
                    font.tickslab = fontSize, font.legend = fontSize,
                    palette = c("springgreen4", "royalblue3", "red","orange2","springgreen2","dodgerblue","indianred","gold1"), legend = "none"
@@ -46,7 +46,7 @@ legend("topright" , c("CI20-14C","CI5-14C","DB-14C","PW-14C", "CI20-20C", "CI5-2
 ggsurvplot(sf, data=OlyLarvaeKMforR, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
            legend.labs=c("CI20-14C","CI5-14C","DB-14C","PW-14C", "CI20-20C", "CI5-20C", "DB-20C", "PW-20C"),legend.title="Treatment", 
            palette =  c('darkgreen', 'blue4', 'darkred', 'darkgoldenrod', '#33CC66','steelblue','red','darkgoldenrod1'),   
-           risk.table.height=.25,xlab="Time (days)", size=0.7, break.y.by=.2, break.time.by = 3,  ggtheme = theme_bw() +  theme(
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
                    panel.grid.major.y = element_blank(),
                    panel.grid.minor.y = element_blank(),  
                    panel.grid.major.x = element_blank(),
@@ -104,15 +104,15 @@ ggforest(cox.number)
 ############time varying coefficients
 
 #show time points in time at which an individual died
-cut.points <- unique(OlyLarvaeKMforR$DayDead[OlyLarvaeKMforR$Status == 1])
+cut.points <- unique(OlyLarvaeKMforR$day[OlyLarvaeKMforR$dead == 1])
 
 #duplicate 4 line per individual, times 0-1, 1-7, 7-10, 10-13 =time0 and time
-SURV2 <- survSplit(data = OlyLarvaeKMforR, cut = cut.points, end = "DayDead", start = "DayDead0", event = "Status")
+SURV2 <- survSplit(data = OlyLarvaeKMforR, cut = cut.points, end = "day", start = "day0", event = "dead")
 View(SURV2)
 cut.points
 
 #run the cox model on orginal data- estimates one treatment male-21yrs
-model.1 <- coxph(Surv(DayDead, Status) ~ TempAsFactor+Location+TempAsFactor:LocationNumber, data = OlyLarvaeKMforR)
+model.1 <- coxph(Surv(day, dead) ~ TempAsFactor+Location+TempAsFactor:LocationNumber, data = OlyLarvaeKMforR)
 model.1
 summary(model.1)
 #Schoenfeld's global test for the violation of proportional assumption-- Grambsch PM, Therneau TM. Proportional hazards tests
