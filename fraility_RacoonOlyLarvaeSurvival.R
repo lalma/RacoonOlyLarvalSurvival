@@ -9,8 +9,7 @@ library(readxl)
 
 
 # Select dataset, import my dataset here, has the same headings as pauls dataset for simplicity
-OlyLarvaeKMforR <- OlyLarvaeKMforR <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/OlyLarvaeKMforR.xlsx")
-#  dataset is d
+OlyLarvaeKMforR <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/OlyLarvaeKMforR.xlsx")#  dataset is d
 d <- OlyLarvaeKMforR
 View(d)
 
