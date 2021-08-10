@@ -1,212 +1,206 @@
-#kaplan meier survival
-
-install.packages("survival")
-installed.packages("survminer")
-install.packages("rms")
+#KM survival curves
 
 library(survival)
 library(survminer)
 library(ggplot2)
 library(rms)
+library(readxl)
+setwd("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/KM curves -single treatment-locatation")
+OlyLarvaeKMforR <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/OlyLarvaeKMforR.xlsx")
 
 ##CI20############
-library(readxl)
+CI20<-subset(OlyLarvaeKMforR, Location=="CI20")
+
+#make surv object
+survCI20 <-Surv(time = CI20$day, CI20$dead, type = "right")
+
+# fit model and plot without random effect
+sfCI20 <- survfit(survCI20 ~ Treatment, data = CI20)
+summary(coxph(survCI20 ~ Treatment, data = CI20))
+ggsurvplot(sf, conf.int = TRUE)
+
+#plot Km curves
+#darker color=14c, lighter color=20c
+ggsurvplot(sfCI20, data=CI20, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
+           legend.labs=c("14C","20C"),legend.title="Treatment", 
+           palette =  c('darkgreen', '#33CC66'),   
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
+             panel.grid.major.y = element_blank(),
+             panel.grid.minor.y = element_blank(),  
+             panel.grid.major.x = element_blank(),
+             panel.grid.minor.x = element_blank()
+           ))
 
 
-
-# day dead in one column 
-Funcio <- with(OlyLarvaeKMforR_CI20, Surv(DayDead,Status))
-View(Funcio)
-
-# Graph the survival distribution of totes you show them sense to have in compte tractament
-# Kaplan-Meier estimator 
-Survival0 <- survfit(Funcio~1, data=OlyLarvaeKMforR_CI20)
-summary(Survival0)
-
-##Kaplan-Meier: comparem la distribucio de supervivencia en els diferents treatment (Natural-Advanced)
-Survival = survfit(Funcio~TempAsFactor+Location, data=OlyLarvaeKMforR_CI20)
-summary(Survival)
-
-#another type of graph
-
-ggsurvplot(Survival, data=OlyLarvaeKMforR_CI20, conf.int=TRUE, conf.int.alpha=0.1, pval=TRUE,legend=c("right"),
-           legend.labs=c("CI20-14C","CI20-20C"),legend.title="Treatment", 
-           palette = c("springgreen4", "springgreen2"),   
-           risk.table.height=.25,xlab="Larval Age (days)")
-
+#COX
 #cox model sample code with interaction, this is the model for the main analysis
-cox<-coxph(Funcio~TempAsFactor, data=OlyLarvaeKMforR_CI20)
-cox##<here results!!!
-summary(cox)
+coxCI20<-coxph(survCI20~Treatment, data=CI20)
+coxCI20##<here results!!!, p<0.0001
+summary(coxCI20)
+#Concordance= 0.575  (se = 0.003 )
+#Likelihood ratio test= 696.8  on 1 df,   p=<2e-16
+#Wald test            = 687.9  on 1 df,   p=<2e-16
+#Score (logrank) test = 708  on 1 df,   p=<2e-16
+#Test no parametric (logrank test) p<0.0001 chisq=4053
+survdiff(formula=Surv(day,dead)~Treatment, data=CI20)
+#Chisq= 675  on 1 degrees of freedom, p= <2e-16 
+surv_pvalue(sfCI20) 
+anova(coxCI20)
+#p<0.0001
+cox.zph(coxCI20)
+plot(cox.zph(coxCI20)) 
+ggforest(coxCI20, data=CI20)
+#sig dfference between temps at CI20 p<0.001 HR=0.54
 
 
 
-##CI5############
-library(readxl)
-OlyLarvaeKMforR_CI5 <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/OlyLarvaeKMforR_CI5.xlsx")
-View(OlyLarvaeKMforR_CI5)
+#CI5########################
+
+CI5<-subset(OlyLarvaeKMforR, Location=="CI5")
+
+#make surv object
+survCI5 <-Surv(time = CI5$day, CI5$dead, type = "right")
+
+# fit model and plot without random effect
+sfCI5 <- survfit(survCI5 ~ Treatment, data = CI5)
+summary(coxph(survCI5 ~ Treatment, data = CI5))
+ggsurvplot(sfCI5, conf.int = TRUE)
+
+#plot Km curves
+#darker color=14c, lighter color=20c
+ggsurvplot(sfCI5, data=CI5, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
+           legend.labs=c("14C","20C"),legend.title="Treatment", 
+           palette =  c('blue4', 'steelblue'),   
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
+             panel.grid.major.y = element_blank(),
+             panel.grid.minor.y = element_blank(),  
+             panel.grid.major.x = element_blank(),
+             panel.grid.minor.x = element_blank()
+           ))
 
 
-# day dead in one column 
-Funcio <- with(OlyLarvaeKMforR_CI5, Surv(DayDead,Status))
-View(Funcio)
-
-# Graph the survival distribution of totes you show them sense to have in compte tractament
-# Kaplan-Meier estimator 
-Survival0 <- survfit(Funcio~1, data=OlyLarvaeKMforR_CI5)
-summary(Survival0)
-
-##Kaplan-Meier: comparem la distribucio de supervivencia en els diferents treatment (Natural-Advanced)
-Survival = survfit(Funcio~TempAsFactor+Location, data=OlyLarvaeKMforR_CI5)
-summary(Survival)
-
-#another type of graph
-
-ggsurvplot(Survival, data=OlyLarvaeKMforR_CI5, conf.int=TRUE, conf.int.alpha=0.1, pval=TRUE,legend=c("right"),
-           legend.labs=c("CI5-14C","CI5-20C"),legend.title="Treatment", 
-           palette = c("royalblue3", "dodgerblue"),   
-           risk.table.height=.25,xlab="Larval Age (days)")
-
+#COX
 #cox model sample code with interaction, this is the model for the main analysis
-cox<-coxph(Funcio~TempAsFactor, data=OlyLarvaeKMforR_CI5)
-cox##<here results!!!
-summary(cox)
+coxCI5<-coxph(survCI5~Treatment, data=CI5)
+coxCI5##<here results!!!, p<0.0001
+summary(coxCI5)
+#Concordance= 0.575  (se = 0.003 )
+#Likelihood ratio test= p=<2e-16
+#Wald test            =   p=<2e-16
+#Score (logrank) test = p=<2e-16
+survdiff(formula=Surv(day,dead)~Treatment, data=CI5)
+#Test non parametric (logrank test) p<0.0001 
+# Chisq= 406  on 1 degrees of freedom, p= <2e-16 
+surv_pvalue(sfCI5) 
+anova(coxCI5)
+#p<0.0001
+cox.zph(coxCI5)
+plot(cox.zph(coxCI5)) 
+ggforest(coxCI5, data=CI5)
+#sig dfference between temps at CI5 p<0.001 HR=0.62
 
 
 
 
+
+
+#DB#############
 ##DB############
-library(readxl)
-OlyLarvaeKMforR_DB <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/OlyLarvaeKMforR_DB.xlsx")
-View(OlyLarvaeKMforR_DB)
+DB<-subset(OlyLarvaeKMforR, Location=="DB")
+
+#make surv object
+survDB <-Surv(time = DB$day, DB$dead, type = "right")
+
+# fit model and plot without random effect
+sfDB <- survfit(survDB ~ Treatment, data = DB)
+summary(coxph(survDB ~ Treatment, data = DB))
+ggsurvplot(sfDB, conf.int = TRUE)
+
+#plot Km curves
+#darker color=14c, lighter color=20c
+ggsurvplot(sfDB, data=DB, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
+           legend.labs=c("14C","20C"),legend.title="Treatment", 
+           palette =  c('darkred', 'red'),   
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
+             panel.grid.major.y = element_blank(),
+             panel.grid.minor.y = element_blank(),  
+             panel.grid.major.x = element_blank(),
+             panel.grid.minor.x = element_blank()
+           ))
 
 
-# day dead in one column 
-Funcio <- with(OlyLarvaeKMforR_DB, Surv(DayDead,Status))
-View(Funcio)
-
-# Graph the survival distribution of totes you show them sense to have in compte tractament
-# Kaplan-Meier estimator 
-Survival0 <- survfit(Funcio~1, data=OlyLarvaeKMforR_DB)
-summary(Survival0)
-
-##Kaplan-Meier: comparem la distribucio de supervivencia en els diferents treatment (Natural-Advanced)
-Survival = survfit(Funcio~TempAsFactor+Location, data=OlyLarvaeKMforR_DB)
-summary(Survival)
-
-#another type of graph
-
-ggsurvplot(Survival, data=OlyLarvaeKMforR_DB, conf.int=TRUE, conf.int.alpha=0.1, pval=TRUE,legend=c("right"),
-           legend.labs=c("DB-14C","DB-20C"),legend.title="Treatment", 
-           palette = c( "red","indianred"),   
-           risk.table.height=.25,xlab="Larval Age (days)")
-
-
-
+#COX
 #cox model sample code with interaction, this is the model for the main analysis
-cox<-coxph(Funcio~TempAsFactor, data=OlyLarvaeKMforR_DB)
-cox##<here results!!!
-summary(cox)
+coxDB<-coxph(survDB~Treatment, data=DB)
+coxDB##<here results!!!, p<0.0001
+summary(coxDB)
+#Concordance= 0.575  (se = 0.003 )
+#Likelihood ratio test=   p=<2e-16
+#Wald test            =  p=<2e-16
+#Score (logrank) test =   p=<2e-16
+#Test no parametric (logrank test) p<0.0001 chisq=4053
+survdiff(formula=Surv(day,dead)~Treatment, data=DB)
+#Chisq= 331  on 1 degrees of freedom, p= <2e-16 
+surv_pvalue(sfDB) 
+anova(coxDB)
+#p<0.0001
+cox.zph(coxDB)
+plot(cox.zph(coxDB)) 
+ggforest(coxDB, data=DB)
+#sig dfference between temps at DB p<0.001 HR=0.59
+
+
+
+
+
 
 
 ##PW############
-library(readxl)
-OlyLarvaeKMforR_PW <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/OlyLarvaeKMforR_PW.xlsx")
-View(OlyLarvaeKMforR_PW)
+PW<-subset(OlyLarvaeKMforR, Location=="PW")
+
+#make surv object
+survPW <-Surv(time = PW$day, PW$dead, type = "right")
+
+# fit model and plot without random effect
+sfPW <- survfit(survPW ~ Treatment, data = PW)
+summary(coxph(survPW ~ Treatment, data = PW))
+ggsurvplot(sfPW, conf.int = TRUE)
+
+#plot Km curves
+#darker color=14c, lighter color=20c
+ggsurvplot(sfPW, data=PW, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
+           legend.labs=c("14C","20C"),legend.title="Treatment", 
+           palette =  c('darkgoldenrod', 'darkgoldenrod1'),   
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
+             panel.grid.major.y = element_blank(),
+             panel.grid.minor.y = element_blank(),  
+             panel.grid.major.x = element_blank(),
+             panel.grid.minor.x = element_blank()
+           ))
 
 
-# day dead in one column 
-Funcio <- with(OlyLarvaeKMforR_PW, Surv(DayDead,Status))
-View(Funcio)
-
-# Graph the survival distribution of totes you show them sense to have in compte tractament
-# Kaplan-Meier estimator 
-Survival0 <- survfit(Funcio~1, data=OlyLarvaeKMforR_PW)
-summary(Survival0)
-
-##Kaplan-Meier: comparem la distribucio de supervivencia en els diferents treatment (Natural-Advanced)
-Survival = survfit(Funcio~TempAsFactor+Location, data=OlyLarvaeKMforR_PW)
-summary(Survival)
-
-#another type of graph
-
-ggsurvplot(Survival, data=OlyLarvaeKMforR_PW, conf.int=TRUE, conf.int.alpha=0.1, pval=TRUE,legend=c("right"),
-           legend.labs=c("PW-14C","PW-20C"),legend.title="Treatment", 
-           palette = c("orange2","gold1"),   
-           risk.table.height=.25,xlab="Larval Age (days)")
-
-
+#COX
 #cox model sample code with interaction, this is the model for the main analysis
-cox<-coxph(Funcio~TempAsFactor, data=OlyLarvaeKMforR_PW)
-cox##<here results!!!
-summary(cox)
-
-
-##20C############
-library(readxl)
-OlyLarvaeKMforR_20C <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/OlyLarvaeKMforR_20C.xlsx")
-View(OlyLarvaeKMforR_20C)
-
-
-# day dead in one column 
-Funcio <- with(OlyLarvaeKMforR_20C, Surv(DayDead,Status))
-View(Funcio)
-
-# Graph the survival distribution of totes you show them sense to have in compte tractament
-# Kaplan-Meier estimator 
-Survival0 <- survfit(Funcio~1, data=OlyLarvaeKMforR_20C)
-summary(Survival0)
-
-##Kaplan-Meier: comparem la distribucio de supervivencia en els diferents treatment (Natural-Advanced)
-Survival = survfit(Funcio~TempAsFactor+Location, data=OlyLarvaeKMforR_20C)
-summary(Survival)
-
-#another type of graph
-
-ggsurvplot(Survival, data=OlyLarvaeKMforR_20C, conf.int=TRUE, conf.int.alpha=0.1, pval=TRUE,legend=c("right"),
-           legend.labs=c("CI20-20C","CI5-20C", "DB20C", "PW20C"),legend.title="Treatment", 
-           palette = c("springgreen2","dodgerblue","indianred","gold1"),   
-           risk.table.height=.25,xlab="Larval Age (days)") 
+coxPW<-coxph(survPW~Treatment, data=PW)
+coxPW##<here results!!!, p<0.0001
+summary(coxPW)
+#Concordance= 0.575  (se = 0.003 )
+#Likelihood ratio test= 696.8  on 1 df,   p=<2e-16
+#Wald test            = 687.9  on 1 df,   p=<2e-16
+#Score (logrank) test = 708  on 1 df,   p=<2e-16
+#Test no parametric (logrank test) p<0.0001 chisq=4053
+survdiff(formula=Surv(day,dead)~Treatment, data=PW)
+#Chisq= 675  on 1 degrees of freedom, p= <2e-16 
+surv_pvalue(sfPW) 
+anova(coxPW)
+#p<0.0001
+cox.zph(coxPW)
+plot(cox.zph(coxPW)) 
+ggforest(coxPW, data=PW)
+#sig dfference between temps at PW p<0.001 HR=0.62
 
 
 
-#cox model sample code with interaction, this is the model for the main analysis
-cox<-coxph(Funcio~Location, data=OlyLarvaeKMforR_20C)
-cox##<here results!!!
-summary(cox)
 
 
-
-###14C###
-library(readxl)
-OlyLarvaeKMforR_14C <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/OlyLarvaeKMforR_14C.xlsx")
-View(OlyLarvaeKMforR_14C)
-
-
-# day dead in one column 
-Funcio <- with(OlyLarvaeKMforR_14C, Surv(DayDead,Status))
-View(Funcio)
-
-# Graph the survival distribution of totes you show them sense to have in compte tractament
-# Kaplan-Meier estimator 
-Survival0 <- survfit(Funcio~1, data=OlyLarvaeKMforR_14C)
-summary(Survival0)
-
-##Kaplan-Meier: comparem la distribucio de supervivencia en els diferents treatment (Natural-Advanced)
-Survival = survfit(Funcio~TempAsFactor+Location, data=OlyLarvaeKMforR_14C)
-summary(Survival)
-
-#another type of graph
-
-ggsurvplot(Survival, data=OlyLarvaeKMforR_14C, conf.int=TRUE, conf.int.alpha=0.1, pval=TRUE,legend=c("right"),
-           legend.labs=c("CI20-14C","CI5-14C", "DB14C", "PW14C"),legend.title="Treatment", 
-           palette = c("springgreen4", "royalblue3", "red","orange2"),   
-           risk.table.height=.25,xlab="Larval Age (days)")
-
-#cox model sample code with interaction, this is the model for the main analysis
-cox<-coxph(Funcio~Location, data=OlyLarvaeKMforR_14C)
-cox##<here results!!!
-summary(cox)
-
-
-
+#
