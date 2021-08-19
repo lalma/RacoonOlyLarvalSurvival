@@ -203,4 +203,105 @@ ggforest(coxPW, data=PW)
 
 
 
-#
+##14C############
+C14<-subset(OlyLarvaeKMforR, Treatment=="14C")
+
+#make surv object
+survC14 <-Surv(time = C14$day, C14$dead, type = "right")
+
+# fit model and plot without random effect
+sfC14 <- survfit(survC14 ~ Location, data = C14)
+summary(coxph(survC14 ~ Location, data = C14))
+ggsurvplot(sfC14, conf.int = TRUE)
+
+#plot Km curves
+#darker color=C14, lighter color=20c
+ggsurvplot(sfC14, data=C14, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
+           legend.labs=c("CI20","CI5", "DB","PW"),legend.title="Location", 
+           palette =  c('darkgreen', 'blue4', 'darkred', 'darkgoldenrod'),   
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
+             panel.grid.major.y = element_blank(),
+             panel.grid.minor.y = element_blank(),  
+             panel.grid.major.x = element_blank(),
+             panel.grid.minor.x = element_blank()
+           ))
+
+
+#COX
+#cox model sample code with interaction, this is the model for the main analysis
+coxC14<-coxph(survC14~Location, data=C14)
+coxC14##<here results!!!, p<0.0001
+summary(coxC14)
+#Concordance= 0.575  (se = 0.003 )
+#Likelihood ratio test= 696.8  on 1 df,   p=<2e-16
+#Wald test            = 687.9  on 1 df,   p=<2e-16
+#Score (logrank) test = 708  on 1 df,   p=<2e-16
+#Test no parametric (logrank test) p<0.0001 chisq=4053
+survdiff(formula=Surv(day,dead)~Location, data=C14)
+#Chisq= 675  on 1 degrees of freedom, p= <2e-16 
+surv_pvalue(sfC14) 
+anova(coxC14)
+#p<0.0001
+cox.zph(coxC14)
+plot(cox.zph(coxC14)) 
+ggforest(coxC14, data=C14)
+#sig dfference between locations except CI5 and CI20
+#CI20 reference
+#CI5, p=0.169, HR=0.97
+#DB=0.001, HR=0.46
+#PW=0.001, HR=0.59
+
+
+
+
+##C20############
+C20<-subset(OlyLarvaeKMforR, Treatment=="20C")
+
+#make surv object
+survC20 <-Surv(time = C20$day, C20$dead, type = "right")
+
+# fit model and plot without random effect
+sfC20 <- survfit(survC20 ~ Location, data = C20)
+summary(coxph(survC20 ~ Location, data = C20))
+ggsurvplot(sfC20, conf.int = TRUE)
+
+#plot Km curves
+#darker color=C20, lighter color=20c
+ggsurvplot(sfC20, data=C20, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
+           legend.labs=c("CI20","CI5", "DB","PW"),legend.title="Location", 
+           palette =  c('#33CC66','steelblue','red','darkgoldenrod1'),   
+           risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
+             panel.grid.major.y = element_blank(),
+             panel.grid.minor.y = element_blank(),  
+             panel.grid.major.x = element_blank(),
+             panel.grid.minor.x = element_blank()
+           ))
+
+
+#COX
+#cox model sample code with interaction, this is the model for the main analysis
+coxC20<-coxph(survC20~Location, data=C20)
+coxC20##<here results!!!, p<0.0001
+summary(coxC20)
+#Concordance= 0.575  (se = 0.003 )
+#Likelihood ratio test= 696.8  on 1 df,   p=<2e-16
+#Wald test            = 687.9  on 1 df,   p=<2e-16
+#Score (logrank) test = 708  on 1 df,   p=<2e-16
+#Test no parametric (logrank test) p<0.0001 chisq=4053
+survdiff(formula=Surv(day,dead)~Location, data=C20)
+#Chisq= 675  on 1 degrees of freedom, p= <2e-16 
+surv_pvalue(sfC20) 
+anova(coxC20)
+#p<0.0001
+cox.zph(coxC20)
+plot(cox.zph(coxC20)) 
+ggforest(coxC20, data=C20)
+#sig dfference between temps at C20 p<0.001 HR=0.54
+
+
+
+
+
+
+
+

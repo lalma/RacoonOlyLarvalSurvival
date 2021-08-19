@@ -6,18 +6,18 @@ library(survminer)
 library(ggplot2)
 library(rms)
 library(readxl)
+library(survELtest)
 
 #upload datasheet 38,400 lines. once for each larvae
-OlyLarvaeKMforR <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/OlyLarvaeKMforR.xlsx")
+OlyLarvaeKMforR <- read_excel("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival/OlyLarvaeKMforR.xlsx")
 View(OlyLarvaeKMforR)
 
 #make surv object
 KMsurv = Surv(time = OlyLarvaeKMforR$day, OlyLarvaeKMforR$dead, type = "right")
-View(KMsurv)
 
 # fit KM model and plot without random effect of tank
 sf <- survfit(KMsurv ~ Treatment+Location, data = OlyLarvaeKMforR)
-summary(coxph(KMsurv ~ Treatment+Location, data = OlyLarvaeKMforR))
+summary(coxph(KMsurv ~ Treatment*Location, data = OlyLarvaeKMforR))
 
 # Graph the KMsurvival distribution
 #you can add pval = TRUE, but we know our p>0.0001
@@ -54,18 +54,26 @@ ggsurvplot(sf, data=OlyLarvaeKMforR, conf.int=T,  risk.table=F, pval=F,legend=c(
            ))
 
 
-#Test no parametric (logrank test) p<0.0001 chisq=4053
+#Test non parametric (logrank test) p<0.0001 chisq=4053
+#report this value in paper to compare data from multuple pairwise groups
+#log-rank test does not make assumptions about survival distribution. Analyzes each cohort separetely. 
+" When
+survival curves cross, the log-rank test should not be
+used because the probability of a type II error will be
+increased, and the test has low power."
 survdiff(formula=Surv(day,dead)~Treatment +Location, data=OlyLarvaeKMforR)
+
+#emperica likelyhood-optimize power
 
 #p-value <0.0001
 surv_pvalue(sf) 
 
 #cox model sample code without interaction
-cox1<-coxph(KMsurv~TempAsFactor+Location, data=OlyLarvaeKMforR)
+cox1<-coxph(KMsurv~Treatment+Location, data=OlyLarvaeKMforR)
 summary(cox1)
 
 #cox model sample code with interaction, this is the model for the main analysis
-cox<-coxph(KMsurv~TempAsFactor+Location+TempAsFactor*Location, data=OlyLarvaeKMforR)
+cox<-coxph(KMsurv~Treatment*Location, data=OlyLarvaeKMforR)
 cox##<here results!!!
 summary(cox)
 #38400 larvae, 25506 death, 12894 censored 
@@ -88,7 +96,7 @@ ggforest(cox, data=OlyLarvaeKMforR)
 #they'd had a transplant by that time
 
 #model with temp only
-coxTemp<-coxph(KMsurv~TempAsFactor, data=OlyLarvaeKMforR)
+coxTemp<-coxph(KMsurv~Treatment, data=OlyLarvaeKMforR)
 ggforest(coxTemp, data=OlyLarvaeKMforR)
 
 #model with locaiton only
