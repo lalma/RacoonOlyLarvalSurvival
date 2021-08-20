@@ -37,6 +37,7 @@ ggsurvplot(sfCI20, data=CI20, conf.int=T,  risk.table=F, pval=F,legend=c("right"
 coxCI20<-coxph(survCI20~Treatment, data=CI20)
 coxCI20##<here results!!!, p<0.0001
 summary(coxCI20)
+ggforest(coxCI20, data=CI20)
 #Concordance= 0.575  (se = 0.003 )
 #Likelihood ratio test= 696.8  on 1 df,   p=<2e-16
 #Wald test            = 687.9  on 1 df,   p=<2e-16
@@ -84,6 +85,7 @@ ggsurvplot(sfCI5, data=CI5, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
 coxCI5<-coxph(survCI5~Treatment, data=CI5)
 coxCI5##<here results!!!, p<0.0001
 summary(coxCI5)
+ggforest(coxCI5, data=CI5)
 #Concordance= 0.575  (se = 0.003 )
 #Likelihood ratio test= p=<2e-16
 #Wald test            =   p=<2e-16
@@ -133,7 +135,7 @@ ggsurvplot(sfDB, data=DB, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
 #cox model sample code with interaction, this is the model for the main analysis
 coxDB<-coxph(survDB~Treatment, data=DB)
 coxDB##<here results!!!, p<0.0001
-summary(coxDB)
+summarycoxDB<-summary(coxDB)
 #Concordance= 0.575  (se = 0.003 )
 #Likelihood ratio test=   p=<2e-16
 #Wald test            =  p=<2e-16
@@ -149,8 +151,7 @@ plot(cox.zph(coxDB))
 ggforest(coxDB, data=DB)
 #sig dfference between temps at DB p<0.001 HR=0.59
 
-
-
+summarycoxDB$conf.int
 
 
 
@@ -254,7 +255,7 @@ ggforest(coxC14, data=C14)
 
 
 
-##C20############
+##C20############< means 20C
 C20<-subset(OlyLarvaeKMforR, Treatment=="20C")
 
 #make surv object
@@ -298,10 +299,146 @@ plot(cox.zph(coxC20))
 ggforest(coxC20, data=C20)
 #sig dfference between temps at C20 p<0.001 HR=0.54
 
+#################Changing refs********************
+
+CI5ref<-subset(OlyLarvaeKMforR, Location==c("CI5", "PW", "DB"))
+View(CI5ref)
+survCI5ref <-Surv(time = CI5ref$day, CI5ref$dead, type = "right")
+sfCI5ref <- survfit(survCI5ref ~ Treatment +Location, data = CI5ref)
+ggsurvplot(sfCI5ref, conf.int = TRUE)
+coxCI5ref<-coxph(survCI5ref ~ Treatment * Location, data = CI5ref)
+coxCI5ref
+summary(coxCI5ref)
+ggforest(coxCI5ref, data=CI5ref)
+
+
+DB5ref<-subset(OlyLarvaeKMforR, Location==c("CI20", "CI5"))
+View(DB5ref)
+survDB5ref <-Surv(time = DB5ref$day, DB5ref$dead, type = "right")
+sfDB5ref <- survfit(survDB5ref ~ Treatment +Location, data = DB5ref)
+ggsurvplot(sfDB5ref, conf.int = TRUE)
+coxDB5ref<-coxph(survDB5ref ~ Treatment * Location, data = DB5ref)
+coxDB5ref
+summary(coxDB5ref)
+ggforest(coxDB5ref, data=DB5ref)
+
+
+PW5ref<-subset(OlyLarvaeKMforR, TreatmentLocation==c("20CPW", "20CDB"))
+View(PW5ref)
+survPW5ref <-Surv(time = PW5ref$day, PW5ref$dead, type = "right")
+sfPW5ref <- survfit(survPW5ref ~ TreatmentLocation, data = PW5ref)
+ggsurvplot(sfPW5ref, conf.int = TRUE)
+coxPW5ref<-coxph(survPW5ref ~ TreatmentLocation, data = PW5ref)
+coxPW5ref
+summary(coxPW5ref)
+ggforest(coxPW5ref, data=PW5ref)
+
+
+LocationOnlyref<-subset(OlyLarvaeKMforR)
+View(LocationOnlyref)
+survLocationOnlyref <-Surv(time = LocationOnlyref$day, LocationOnlyref$dead, type = "right")
+sfLocationOnlyref <- survfit(survLocationOnlyref ~ Location, data = LocationOnlyref)
+ggsurvplot(sfLocationOnlyref, conf.int = TRUE)
+coxLocationOnlyref<-coxph(survLocationOnlyref ~ Location, data = LocationOnlyref)
+coxLocationOnlyref
+summary(coxLocationOnlyref)
+ggforest(coxLocationOnlyref, data=LocationOnlyref)
+
+
+CI5LocationOnlyref<-subset(OlyLarvaeKMforR, Location==c("CI5","PW", "DB"))
+View(CI5LocationOnlyref)
+survCI5LocationOnlyref <-Surv(time = CI5LocationOnlyref$day, CI5LocationOnlyref$dead, type = "right")
+sfCI5LocationOnlyref <- survfit(survCI5LocationOnlyref ~ Location, data = CI5LocationOnlyref)
+ggsurvplot(sfCI5LocationOnlyref, conf.int = TRUE)
+coxCI5LocationOnlyref<-coxph(survCI5LocationOnlyref ~ Location, data = CI5LocationOnlyref)
+coxCI5LocationOnlyref
+summary(coxCI5LocationOnlyref)
+ggforest(coxCI5LocationOnlyref, data=CI5LocationOnlyref)
+
+
+DB5LocationOnlyref<-subset(OlyLarvaeKMforR, Location==c("PW", "DB"))
+View(DB5LocationOnlyref)
+survDB5LocationOnlyref <-Surv(time = DB5LocationOnlyref$day, DB5LocationOnlyref$dead, type = "right")
+sfDB5LocationOnlyref <- survfit(survDB5LocationOnlyref ~ Location, data = DB5LocationOnlyref)
+ggsurvplot(sfDB5LocationOnlyref, conf.int = TRUE)
+coxDB5LocationOnlyref<-coxph(survDB5LocationOnlyref ~ Location, data = DB5LocationOnlyref)
+coxDB5LocationOnlyref
+summary(coxDB5LocationOnlyref)
+ggforest(coxDB5LocationOnlyref, data=DB5LocationOnlyref)
+
+#original no subset
+survOlyLarvaeKMforR  <-Surv(time = OlyLarvaeKMforR $day, OlyLarvaeKMforR $dead, type = "right")
+sfOlyLarvaeKMforR  <- survfit(survOlyLarvaeKMforR  ~ Treatment +Location, data = OlyLarvaeKMforR )
+ggsurvplot(sfOlyLarvaeKMforR , conf.int = TRUE)
+coxOlyLarvaeKMforR <-coxph(survOlyLarvaeKMforR  ~ Treatment * Location, data = OlyLarvaeKMforR )
+coxOlyLarvaeKMforR 
+summary(coxOlyLarvaeKMforR )
+ggforest(coxOlyLarvaeKMforR , data=OlyLarvaeKMforR )
 
 
 
+DB520ref<-subset(OlyLarvaeKMforR, TreatmentLocation==c("20CPW", "20CCI5", "20CDB"))
+View(DB520ref)
+survDB520ref <-Surv(time = DB520ref$day, DB520ref$dead, type = "right")
+sfDB520ref <- survfit(survDB520ref ~ TreatmentLocation, data = DB520ref)
+ggsurvplot(sfDB520ref, conf.int = TRUE)
+coxDB520ref<-coxph(survDB520ref ~ TreatmentLocation, data = DB520ref)
+coxDB520ref
+summary(coxDB520ref)
+ggforest(coxDB520ref, data=DB520ref)
 
 
+DB520ref<-subset(OlyLarvaeKMforR, TreatmentLocation==c("20CPW", "20CCI5"))
+survDB520ref <-Surv(time = DB520ref$day, DB520ref$dead, type = "right")
+sfDB520ref <- survfit(survDB520ref ~ Treatment + Location, data = DB520ref)
+ggsurvplot(sfDB520ref, conf.int = TRUE)
+coxDB520ref<-coxph(survDB520ref ~ TreatmentLocation, data = DB520ref)
+coxDB520ref
+summary(coxDB520ref)
+ggforest(coxDB520ref, data=DB520ref)
+
+DB520ref<-subset(OlyLarvaeKMforR, TreatmentLocation==c("20CDB", "14CPW"))
+survDB520ref <-Surv(time = DB520ref$day, DB520ref$dead, type = "right")
+sfDB520ref <- survfit(survDB520ref ~ Treatment + Location, data = DB520ref)
+ggsurvplot(sfDB520ref, conf.int = TRUE)
+coxDB520ref<-coxph(survDB520ref ~ TreatmentLocation, data = DB520ref)
+coxDB520ref
+summary(coxDB520ref)
+ggforest(coxDB520ref, data=DB520ref)
+
+DB520ref<-subset(OlyLarvaeKMforR, TreatmentLocation==c("20CDB", "20CCI5"))
+survDB520ref <-Surv(time = DB520ref$day, DB520ref$dead, type = "right")
+sfDB520ref <- survfit(survDB520ref ~ Treatment + Location, data = DB520ref)
+ggsurvplot(sfDB520ref, conf.int = TRUE)
+coxDB520ref<-coxph(survDB520ref ~ TreatmentLocation, data = DB520ref)
+coxDB520ref
+summary(coxDB520ref)
+ggforest(coxDB520ref, data=DB520ref)
 
 
+DB520ref<-subset(OlyLarvaeKMforR, TreatmentLocation==c("20CPW", "20CCI5"))
+survDB520ref <-Surv(time = DB520ref$day, DB520ref$dead, type = "right")
+sfDB520ref <- survfit(survDB520ref ~ Treatment + Location, data = DB520ref)
+ggsurvplot(sfDB520ref, conf.int = TRUE)
+coxDB520ref<-coxph(survDB520ref ~ TreatmentLocation, data = DB520ref)
+coxDB520ref
+summary(coxDB520ref)
+ggforest(coxDB520ref, data=DB520ref)
+
+DB520ref<-subset(OlyLarvaeKMforR, TreatmentLocation==c("14CPW", "20CCI5"))
+survDB520ref <-Surv(time = DB520ref$day, DB520ref$dead, type = "right")
+sfDB520ref <- survfit(survDB520ref ~ Treatment + Location, data = DB520ref)
+ggsurvplot(sfDB520ref, conf.int = TRUE)
+coxDB520ref<-coxph(survDB520ref ~ TreatmentLocation, data = DB520ref)
+coxDB520ref
+summary(coxDB520ref)
+ggforest(coxDB520ref, data=DB520ref)
+
+DB520ref<-subset(OlyLarvaeKMforR, Location==c("DB","CI5","PW"))
+survDB520ref <-Surv(time = DB520ref$day, DB520ref$dead, type = "right")
+sfDB520ref <- survfit(survDB520ref ~ Location, data = DB520ref)
+ggsurvplot(sfDB520ref, conf.int = TRUE)
+coxDB520ref<-coxph(survDB520ref ~ Location, data = DB520ref)
+coxDB520ref
+summary(coxDB520ref)
+ggforest(coxDB520ref, data=DB520ref)
