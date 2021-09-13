@@ -113,8 +113,13 @@ bestDist <- dLike$dist[dLike$logLike == max(dLike$logLike)]
 # fit model with Group random effect using best fit frailty distribu1tion
 #will take a while to run- start 4:15 7-21-21, finish by morning 7-21-21
 fme <- emfrail(surv ~ Treatment + Location+ cluster(Group), 
-               distribution = emfrail_dist(dist = frailtyDist$dist[frailtyDist$name == bestDist],
-                                           pvfm = frailtyDist$m[frailtyDist$name == bestDist] ),
+               distribution = emfrail_dist(dist = frailtyDist$dist[frailtyDist$name == bestDist], 
+  
+  #fme <- emfrail(surv ~ Treatment + cluster(Group), 
+ # distribution = emfrail_dist(dist = frailtyDist$dist[frailtyDist$name == bestDist],
+  #                            pvfm = frailtyDist$m[frailtyDist$name == bestDist] ),
+  #data = d)                                         
+                                                                                    pvfm = frailtyDist$m[frailtyDist$name == bestDist] ),
 #Both the Commenges-Andersen test for heterogeneity and the one-sided likelihood ratio test deems the random effect highly significant.
 #The Commenges-Andersen score test for heterogeneity (Commenges and Andersen 1995) is implemented in frailtyEM.
 summary(fme)
@@ -127,10 +132,10 @@ summary(fme)
 #frailty plot - shows variation in frailty terms
 autoplot(fme, type = "frail")
 #By default, the predict function creates predictions for each row of newdata or for each value of autopiolt separately
-#newdata = data.frame(Treatment= unique(d$Treatment), Location = unique(d$Location))
+newdata = data.frame(Treatment= unique(d$Treatment), Location = unique(d$Location))
 
 #new data of treatments for survival plots
-#dNew <- data.frame(Treatment = unique(d$Treatment)
+dNew <- data.frame(Treatment = unique(d$Treatment))
 
 #made a new matrix called dNew, which has the unique treatments and locations. 
 #not sure if this is the correct format. need help here.

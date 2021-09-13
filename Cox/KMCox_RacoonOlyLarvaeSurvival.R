@@ -120,7 +120,7 @@ View(SURV2)
 cut.points
 
 #run the cox model on orginal data- estimates one treatment male-21yrs
-model.1 <- coxph(Surv(day, dead) ~ TempAsFactor+Location+TempAsFactor:LocationNumber, data = OlyLarvaeKMforR)
+model.1 <- coxph(Surv(day, dead) ~ Treatment+Location+Treatment:Location, data = OlyLarvaeKMforR)
 model.1
 summary(model.1)
 #Schoenfeld's global test for the violation of proportional assumption-- Grambsch PM, Therneau TM. Proportional hazards tests
@@ -128,13 +128,69 @@ summary(model.1)
 zph<-cox.zph(model.1)
 zph
 #results of cox.zph show there is significant deviation from the proportional hazards assumption for the variable
-covs <- data.frame(Location = "CI20", TempAsFactor = "14C")
+covs <- data.frame(Location = "CI20", Treatment = "14C")
 covs
 summary(survfit(model.1, newdata = covs, type = "aalen"))
 #output gives us probability of survival for CI20 14C for each day, i.e. a larvae has a .708 chance of survivind to day 4, but 0.163 chance of surviving to day 15
 cox.zph(model.1)
 #The result of zph shows that there is significant deviation from the proportional hazards assumption for all veriables
 ggforest(model.1, SURV2)
+plot(cox.zph(model.1)) 
 
 
+####Percent mortality
+CI2020C<-subset(OlyLarvaeKMforR, TreatmentLocation=="20CCI20")
+CI2020Cend<-sum(CI2020C$Status)
+CI2020Cend
+CI2020Ctot<-length(CI2020C$Status)
+CI2020Ctot
+CI2020Cend/CI2020Ctot
 
+CI2014C<-subset(OlyLarvaeKMforR, TreatmentLocation=="14CCI20")
+CI2014Cend<-sum(CI2014C$Status)
+CI2014Cend
+CI2014Ctot<-length(CI2014C$Status)
+CI2014Ctot
+CI2014Cend/CI2014Ctot
+
+CI520C<-subset(OlyLarvaeKMforR, TreatmentLocation=="20CCI5")
+CI520Cend<-sum(CI520C$Status)
+CI520Cend
+CI520Ctot<-length(CI520C$Status)
+CI520Ctot
+CI520Cend/CI520C
+
+CI514C<-subset(OlyLarvaeKMforR, TreatmentLocation=="14CCI5")
+CI514Cend<-sum(CI514C$Status)
+CI514Cend
+CI514Ctot<-length(CI514C$Status)
+CI514Ctot
+CI514Cend/CI514Ctot
+
+DB520C<-subset(OlyLarvaeKMforR, TreatmentLocation=="20CDB")
+DB520Cend<-sum(DB520C$Status)
+DB520Cend
+DB520Ctot<-length(DB520C$Status)
+DB520Ctot
+DB520Cend/DB520Ctot
+
+DB514C<-subset(OlyLarvaeKMforR, TreatmentLocation=="14CDB")
+DB514Cend<-sum(DB514C$Status)
+DB514Cend
+DB514Ctot<-length(DB514C$Status)
+DB514Ctot
+DB514Cend/DB514Ctot
+
+PW520C<-subset(OlyLarvaeKMforR, TreatmentLocation=="20CPW")
+PW520Cend<-sum(PW520C$Status)
+PW520Cend
+PW520Ctot<-length(PW520C$Status)
+PW520Ctot
+PW520Cend/PW520Ctot
+
+PW514C<-subset(OlyLarvaeKMforR, TreatmentLocation=="14CPW")
+PW514Cend<-sum(PW514C$Status)
+PW514Cend
+PW514Ctot<-length(PW514C$Status)
+PW514Ctot
+PW514Cend/PW514Ctot
