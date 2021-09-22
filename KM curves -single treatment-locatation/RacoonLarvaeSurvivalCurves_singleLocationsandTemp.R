@@ -23,7 +23,7 @@ ggsurvplot(sf, conf.int = TRUE)
 #darker color=14c, lighter color=20c
 ggsurvplot(sfCI20, data=CI20, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
            legend.labs=c("14C","20C"),legend.title="Treatment", 
-           palette =  c('darkgreen', '#33CC66'),   
+           palette =  c('#006600', '#66ff66'),   
            risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
              panel.grid.major.y = element_blank(),
              panel.grid.minor.y = element_blank(),  
@@ -71,7 +71,7 @@ ggsurvplot(sfCI5, conf.int = TRUE)
 #darker color=14c, lighter color=20c
 ggsurvplot(sfCI5, data=CI5, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
            legend.labs=c("14C","20C"),legend.title="Treatment", 
-           palette =  c('blue4', 'steelblue'),   
+           palette =  c('#33CCFF', '#000066'),   
            risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
              panel.grid.major.y = element_blank(),
              panel.grid.minor.y = element_blank(),  
@@ -122,7 +122,7 @@ ggsurvplot(sfDB, conf.int = TRUE)
 #darker color=14c, lighter color=20c
 ggsurvplot(sfDB, data=DB, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
            legend.labs=c("14C","20C"),legend.title="Treatment", 
-           palette =  c('darkred', 'red'),   
+           palette =  c('#660000', '#FF6666'),   
            risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
              panel.grid.major.y = element_blank(),
              panel.grid.minor.y = element_blank(),  
@@ -171,7 +171,7 @@ ggsurvplot(sfPW, conf.int = TRUE)
 #darker color=14c, lighter color=20c
 ggsurvplot(sfPW, data=PW, conf.int=T,  risk.table=F, pval=F,legend=c("right"),
            legend.labs=c("14C","20C"),legend.title="Treatment", 
-           palette =  c('darkgoldenrod', 'darkgoldenrod1'),   
+           palette =  c('#996600', '#FFCC33'),   
            risk.table.height=.25,xlab="Time (days)", size=0.7, break.time.by = 3, break.y.by=.2, ggtheme = theme_bw() +  theme(
              panel.grid.major.y = element_blank(),
              panel.grid.minor.y = element_blank(),  
