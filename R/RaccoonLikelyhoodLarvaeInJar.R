@@ -112,7 +112,7 @@ View(d_fake)
 
 #create simulted data
 #n_rep is the number of replicate trajectories
-n_rep <- 1000 
+n_rep <- 50 
 d_sim <- NULL
 for(i in 1:nrow(d_fake)){
   d_sim <- rbind(d_sim, data.frame(treatment = rep(d_fake$treatment[i], n_rep),
@@ -121,8 +121,8 @@ for(i in 1:nrow(d_fake)){
                                    jar_count = r_jar(n_rep, d_fake$count[i], d_jar_dist),
                                    replicate = 1:n_rep))
 }
-##8,400 rows here
-##takes a while to run 10-15 min
+##60,000 rows here
+##takes a while to run 
 View(d_sim)
 write.csv(d_sim, "d_sim.csv")
 
@@ -132,7 +132,7 @@ d_sim_sorted <- d_sim%>%
   full_join(d_fake) %>%
   arrange(jar_id, replicate, day)
 
-##8,400 rows here
+
 View(d_sim_sorted)
 write.csv(d_sim_sorted, "d_sim_sorted.csv")
 
@@ -157,10 +157,9 @@ d_sim_decreasing <- d_sim_sorted %>%
   filter(is_all_decreasing) %>%
   ungroup() %>%
   {.}
-##here i get a blank dataframe
+
 View(d_sim_decreasing)
-## if hastag out filter(is_all_decreasing) %>% is_decresing is a mix of true and false,
-##but_is_all_decresing are all false
+
 
 #plot the decreasing series 
 #of the 300 series orginally created, not that many turn out to be monotonically decreasing
@@ -168,6 +167,8 @@ d_sim_decreasing %>%
   ggplot(aes(day, jar_count)) +
   geom_step(aes(colour = as.factor(replicate))) +
   facet_wrap(vars(jar_id, replicate))
+
+ggsave("decresing_CI20only_50reps.png")
 
 #Next steps on this.
 # simulate a 1000 valid (monotoncially decreasing) time series of counts for each jar
