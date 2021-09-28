@@ -46,7 +46,7 @@ d_jar_dist <- data.frame(sample_count = rep(0:max_count, each = max_possible_lar
   mutate(cummulative_prob = cumsum(prob_jar_given_count)) %>%
   ungroup() %>%
   {.}
-View(d_jar_dist)
+#View(d_jar_dist)
 
 #plot of the prob distribuion
 d_jar_dist %>%
@@ -102,26 +102,68 @@ data.frame(r0 = r_jar(100, 0, d_jar_dist),
   geom_histogram() +
   facet_wrap(vars(sample_count), scales = "free")
 
-#fake count data for 6ml samples 
-##fake data is actually real data
-## include 14 days from 6 jars 2 temps 4 sites
-##288 rows long
-library(readxl)
-d_fake <- read_excel(here("data","real data.xlsx"))
-here("data","real data.xlsx")
-d_fake<-real_data
-View(d_fake)
+
+#read in the real data
+# count data for 6ml samples 
+d_count <- read_excel(here("data","real data.xlsx")) %>%
+  unite(jar_id_treat, c(jar_id, treatment, site)) %>%
+  arrange(jar_id_treat, day)
+#vector of unique jar IDs
+jar <- unique(d_count$jar_id_treat)
+#number of jar IDs
+n_jar <- length(jar)
+
+###fix this loop!
+n_rep <- 5
+d_sim <- NULL
+#for(i in 1:length(jar)){
+for(i in 1:3){
+  print(paste("i",i))
+  d_jar <- d_count %>%
+    filter(jar_id_treat == jar[i])
+  count <- d_jar$count
+  n_count <- length(count)
+  r_count <- count
+  rep_counter <- 1
+  while(rep_counter < n_rep) {
+    is_valid <- TRUE
+    for(j in 1:n_count){
+      print(paste("j",j))
+      r_count[j] <- r_jar(1, count[j], d_jar_dist)
+      if(j > 1){
+        if(r_count[j] < r_count[j-1]){
+          is_valid <- FALSE
+          print(paste(r_count[j], ":", r_count[j-1]))
+          break
+        }
+      }
+    }
+    if(is_valid){
+      d_temp <- data.frame(day = d_jar$day,
+                           raw_count = count, 
+                           sim_count = r_count) %>%
+        mutate(jar_id = jar[i],
+               rep_id = n_rep)
+      d_sim <- rbind(d_sim, d_temp)
+      rep_counter = rep_counter + 1
+      print(paste("rep_counter", rep_counter))
+    }
+  }
+}
+
+
+
 
 #create simulted data
 #n_rep is the number of replicate trajectories
 n_rep <- 1000
 d_sim <- NULL
-for(i in 1:nrow(d_fake)){
-  d_sim <- rbind(d_sim, data.frame(treatment = rep(d_fake$treatment[i], n_rep),
-                                   jar_id = rep(d_fake$jar_id[i], n_rep),
-                                   day = rep(d_fake$day[i], n_rep),
-                                   site = rep(d_fake$site[i], n_rep),
-                                   jar_count = r_jar(n_rep, d_fake$count[i], d_jar_dist),
+for(i in 1:nrow(d_count)){
+  d_sim <- rbind(d_sim, data.frame(treatment = rep(d_count$treatment[i], n_rep),
+                                   jar_id = rep(d_count$jar_id[i], n_rep),
+                                   day = rep(d_count$day[i], n_rep),
+                                   site = rep(d_count$site[i], n_rep),
+                                   jar_count = r_jar(n_rep, d_count$count[i], d_jar_dist),
                                    replicate = 1:n_rep))
 }
 ##288,000 rows here
