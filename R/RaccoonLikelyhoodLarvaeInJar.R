@@ -7,6 +7,8 @@
 library(tidyverse)
 library(here)
 library(readxl)
+set_here("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival")
+
 
 #jar and sample volumes (ml)
 vol_jar <- 100 
@@ -28,7 +30,7 @@ p <- vol_sample / vol_jar
 # Thus, the probability is the likelihood of the sample given the jar total
 
 # maximum number if larvae ever counted in a 6ml sample (can change this to the actual value)
-max_count <- 81
+max_count <- 71
 # total number of larvae you think there could possibly be in a jar 
 # (since target initial abundance is 800, 2000 should be plenty 
 #no penalty for guessing big except a waste of computer time
@@ -103,21 +105,24 @@ data.frame(r0 = r_jar(100, 0, d_jar_dist),
   facet_wrap(vars(sample_count), scales = "free")
 
 #fake count data for 6ml samples 
-##fake data is actually real data -but DB location only 
-## include 14 days from 6 jars 2 temps
-##84 rows long
+##fake data is actually real data
+## include 14 days from 6 jars 2 temps 4 sites
+##288 rows long
 library(readxl)
-d_fake <- read_excel(here("data/RaccoonLikelyhoodLarvaeInJar","real data.xlsx"))
+d_fake <- read_excel(here("data","real data.xlsx"))
+here("data","real data.xlsx")
+d_fake<-real data
 View(d_fake)
 
 #create simulted data
 #n_rep is the number of replicate trajectories
-n_rep <- 50 
+n_rep <- 1000
 d_sim <- NULL
 for(i in 1:nrow(d_fake)){
   d_sim <- rbind(d_sim, data.frame(treatment = rep(d_fake$treatment[i], n_rep),
                                    jar_id = rep(d_fake$jar_id[i], n_rep),
                                    day = rep(d_fake$day[i], n_rep),
+                                   site = rep(d_fake$site[i], n_rep),
                                    jar_count = r_jar(n_rep, d_fake$count[i], d_jar_dist),
                                    replicate = 1:n_rep))
 }
@@ -160,6 +165,8 @@ d_sim_decreasing <- d_sim_sorted %>%
 
 View(d_sim_decreasing)
 
+aggregate(is_decreasing~site+treatment+jar_id, data=d_sim_decreasing, length)
+
 
 #plot the decreasing series 
 #of the 300 series orginally created, not that many turn out to be monotonically decreasing
@@ -169,6 +176,21 @@ d_sim_decreasing %>%
   facet_wrap(vars(jar_id, replicate))
 
 ggsave("decresing_CI20only_50reps.png")
+
+aggregate(o2consumption~sitedepth+Date+Treatment, data=Mussel_Temp, length)
+
+#add oututput
+#settings-manage access-paul right permission 
+
+#Subset all that are rep 1- do a cox model, save the cox model in a list- do that for all the reps.-500 reps
+#500 good reps- run 500 times- save for each rep in a list- from that list, extract an make a column that is HR and coeffieicents
+#sort coeffiencnts- look at upper and lower percentiles. bottom and top 95% is oyour CI, HR is average
+#length of cox sort is # or replicates- so if you did 1000 it would be 1000- were looking at the univeal jars that exist- for each estimate of cox model, you are using all of the jars but each of the simulation sets are from different individuals
+#you have all 48 jars, you have an estimate of how many are in those jars 1000 times, do the reps in sets-1st 2nd 3rd etc
+#you have 48 jars-you need to the expansion to track individuals- expand
+#1000x1000
+#coxem for random jar
+#we need 500 from each jar that are decresing-go thru jar by jar 48x500X#ofdays<-do this first
 
 #Next steps on this.
 # simulate a 1000 valid (monotoncially decreasing) time series of counts for each jar
