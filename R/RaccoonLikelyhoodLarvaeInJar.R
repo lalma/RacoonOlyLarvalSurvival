@@ -7,8 +7,6 @@
 library(tidyverse)
 library(here)
 library(readxl)
-set_here("C:/Users/Lindsay/Dropbox/Raccoon/larvae/oyster/larvae survival stats/GitHub/RacoonOlyLarvalSurvival")
-
 
 #jar and sample volumes (ml)
 vol_jar <- 100 
@@ -111,7 +109,7 @@ data.frame(r0 = r_jar(100, 0, d_jar_dist),
 library(readxl)
 d_fake <- read_excel(here("data","real data.xlsx"))
 here("data","real data.xlsx")
-d_fake<-real data
+d_fake<-real_data
 View(d_fake)
 
 #create simulted data
@@ -126,7 +124,7 @@ for(i in 1:nrow(d_fake)){
                                    jar_count = r_jar(n_rep, d_fake$count[i], d_jar_dist),
                                    replicate = 1:n_rep))
 }
-##60,000 rows here
+##288,000 rows here
 ##takes a while to run 
 View(d_sim)
 write.csv(d_sim, "d_sim.csv")
@@ -163,7 +161,10 @@ d_sim_decreasing <- d_sim_sorted %>%
   ungroup() %>%
   {.}
 
+#23,070 lines
 View(d_sim_decreasing)
+write.csv(d_sim_decreasing, "d_sim_decresing.csv")
+
 
 aggregate(is_decreasing~site+treatment+jar_id, data=d_sim_decreasing, length)
 
@@ -172,25 +173,36 @@ aggregate(is_decreasing~site+treatment+jar_id, data=d_sim_decreasing, length)
 #of the 300 series orginally created, not that many turn out to be monotonically decreasing
 d_sim_decreasing %>%
   ggplot(aes(day, jar_count)) +
-  geom_step(aes(colour = as.factor(replicate))) +
-  facet_wrap(vars(jar_id, replicate))
+  geom_step(aes(colour = as.factor(replicate)), show.legend = FALSE) +
+  facet_wrap(vars(jar_id, replicate))+
+  theme(legend.position = "none")
 
-ggsave("decresing_CI20only_50reps.png")
+ggsave("decresing_1000reps_nolegend.png")
 
 aggregate(o2consumption~sitedepth+Date+Treatment, data=Mussel_Temp, length)
 
-#add oututput
-#settings-manage access-paul right permission 
+#Number of days we counted per site/treatment
+#CI20- (5 days) 1,4,7,10,14
+#CI5- (6 days) 1,3,6,9,11,14
+#DB- (7 days) 1,3,5,7,10,12,14
+#PW- (6 days) 1,4,7,10,12,14
+#=24 days*48 jars*500=576,000
 
-#Subset all that are rep 1- do a cox model, save the cox model in a list- do that for all the reps.-500 reps
-#500 good reps- run 500 times- save for each rep in a list- from that list, extract an make a column that is HR and coeffieicents
-#sort coeffiencnts- look at upper and lower percentiles. bottom and top 95% is oyour CI, HR is average
-#length of cox sort is # or replicates- so if you did 1000 it would be 1000- were looking at the univeal jars that exist- for each estimate of cox model, you are using all of the jars but each of the simulation sets are from different individuals
-#you have all 48 jars, you have an estimate of how many are in those jars 1000 times, do the reps in sets-1st 2nd 3rd etc
-#you have 48 jars-you need to the expansion to track individuals- expand
-#1000x1000
-#coxem for random jar
-#we need 500 from each jar that are decresing-go thru jar by jar 48x500X#ofdays<-do this first
+
+# example while loop
+
+
+# example while loop
+
+n_valid_rep <- 500
+valid_rep_counter <- 0
+while(valid_rep_counter < n_valid_rep) {
+  # make sim data to test if decreasing
+  if(decreasing == TRUE){ #test whether the data are decreaseing
+    #add valid data to the dataframe
+    valid_rep_counter <- valid_rep_counter + 1
+  }
+  
 
 #Next steps on this.
 # simulate a 1000 valid (monotoncially decreasing) time series of counts for each jar
