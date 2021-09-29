@@ -110,7 +110,7 @@ d_count <- read_excel(here("data","real data.xlsx")) %>%
   group_by(jar_id) %>%
   mutate(delta_count = count - lag(count)) %>%
   ungroup()
-#vector of unique jar IDs
+#vector of unique jar IDs = 48
 jar <- unique(d_count$jar_id)
 
 
@@ -122,6 +122,22 @@ problem_jars <- d_count %>%
   {.}
 jar %in% problem_jars
 good_jars <- jar[!(jar %in% problem_jars)]
+good_jars
+problem_jars
+
+#problem jars=28 31 32 33 34 35 45 48
+#Jar 28- real variation. Had some samples with 9, 9, 9, 11, 14 larvae total per sample with a high number of live in each
+#Jar 31- had a single 1 ml sample where 18 were alive on day 10 which brought the count up
+#Jar 32- typo, had one jar with 22 instead of 2
+#Jar 33- On day 3 there were a particurlay large number of larvae per ml: 18,15,15,9. Maybe interns didnt mix correctly?
+#Jar 34- Not anything to explain here, thats just how the counts came out
+#Jar 35- On day 12 there were a particurlay large number of larvae per ml. Maybe interns didnt mix correctly?
+#Jar 45- On day 1 got 2 1 ml samples with only 1 or 2 larvae, brought count down.
+#Jar 48- Not anything to explain here, thats just how the counts came out
+
+
+
+
 
 #Create simulated jar sample time series
 # n_rep = number of replicate series to create
