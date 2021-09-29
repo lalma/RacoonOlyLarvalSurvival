@@ -111,7 +111,7 @@ d_count <- read_excel(here("data","real data.xlsx")) %>%
   mutate(delta_count = count - lag(count)) %>%
   ungroup()
 #vector of unique jar IDs = 48
-jar <- unique(d_count$jar_id)
+all_jars <- unique(d_count$jar_id)
 
 
 #find problem jars with large increase in count from one time step to the next
@@ -120,10 +120,9 @@ problem_jars <- d_count %>%
   pull(jar_id) %>%
   unique() %>%
   {.}
-jar %in% problem_jars
-good_jars <- jar[!(jar %in% problem_jars)]
-good_jars
-problem_jars
+
+good_jars <- all_jars[!(all_jars %in% problem_jars)]
+
 
 #problem jars=28 31 32 33 34 35 45 48
 #Jar 28- real variation. Had some samples with 9, 9, 9, 11, 14 larvae total per sample with a high number of live in each
@@ -142,17 +141,22 @@ problem_jars
 #Create simulated jar sample time series
 # n_rep = number of replicate series to create
 # This should be >=500 but 5 is engouhg to show how it works
-n_rep <- 10
+n_rep <- 5
 # empty frame to hold result
 d_sim <- NULL
-#loop through all the jars
-# (just using "good jars", the "problem jars" take a really long time)
-for(i in 1:length(good_jars)){
+#pick which jars to run
+#run_jars <- jar
+run_jars <- problem_jars
+#run_jars <- good_jars
+#loop through all the jars picked
+#time the loop
+start_time <- Sys.time()
+for(i in 1:length(run_jars)){
   #print jar to track progress
-  print(paste("jar",good_jars[i]))
+  print(paste("jar",run_jars[i]))
   #use data from one jar
   d_jar <- d_count %>%
-    filter(jar_id == good_jars[i])
+    filter(jar_id == run_jars[i])
   #vector of raw jar sample count
   count <- d_jar$count
   n_count <- length(count)
@@ -174,7 +178,7 @@ for(i in 1:length(good_jars)){
       d_temp <- data.frame(day = d_jar$day,
                            raw_count = count, 
                            sim_count = r_count) %>%
-        mutate(jar_id = good_jars[i],
+        mutate(jar_id = run_jars[i],
                rep_id = rep_counter,
                treatment = d_jar$treatment[1],
                site = d_jar$treatment[1])
@@ -185,6 +189,8 @@ for(i in 1:length(good_jars)){
     }
   }
 }
+end_time <- Sys.time()
+end_time - start_time
 
 # plot the first 5 simulated series for all jars
 d_sim %>%
