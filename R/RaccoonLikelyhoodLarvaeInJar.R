@@ -106,122 +106,86 @@ data.frame(r0 = r_jar(100, 0, d_jar_dist),
 #read in the real data
 # count data for 6ml samples 
 d_count <- read_excel(here("data","real data.xlsx")) %>%
-  unite(jar_id_treat, c(jar_id, treatment, site)) %>%
-  arrange(jar_id_treat, day)
+  arrange(jar_id, day) %>%
+  group_by(jar_id) %>%
+  mutate(delta_count = count - lag(count)) %>%
+  ungroup()
 #vector of unique jar IDs
-jar <- unique(d_count$jar_id_treat)
-#number of jar IDs
-n_jar <- length(jar)
+jar <- unique(d_count$jar_id)
 
-###fix this loop!
-n_rep <- 5
+
+#find problem jars with large increase in count from one time step to the next
+problem_jars <- d_count %>%
+  filter(delta_count >= 10 ) %>%
+  pull(jar_id) %>%
+  unique() %>%
+  {.}
+jar %in% problem_jars
+good_jars <- jar[!(jar %in% problem_jars)]
+
+#Create simulated jar sample time series
+# n_rep = number of replicate series to create
+# This should be >=500 but 5 is engouhg to show how it works
+n_rep <- 10
+# empty frame to hold result
 d_sim <- NULL
-#for(i in 1:length(jar)){
-for(i in 1:3){
-  print(paste("i",i))
+#loop through all the jars
+# (just using "good jars", the "problem jars" take a really long time)
+for(i in 1:length(good_jars)){
+  #print jar to track progress
+  print(paste("jar",good_jars[i]))
+  #use data from one jar
   d_jar <- d_count %>%
-    filter(jar_id_treat == jar[i])
+    filter(jar_id == good_jars[i])
+  #vector of raw jar sample count
   count <- d_jar$count
   n_count <- length(count)
+  # vector the same lenght as count to hold random draw data 
+  #(this gets over-written)
   r_count <- count
+  # initialize rep counter to track number of simulated series
   rep_counter <- 1
-  while(rep_counter < n_rep) {
-    is_valid <- TRUE
+  # while to so keep repeating until you get enough decreasing time series
+  while(rep_counter <= n_rep) {
+    #create a simulated jar counter time series
     for(j in 1:n_count){
-      print(paste("j",j))
       r_count[j] <- r_jar(1, count[j], d_jar_dist)
-      if(j > 1){
-        if(r_count[j] < r_count[j-1]){
-          is_valid <- FALSE
-          print(paste(r_count[j], ":", r_count[j-1]))
-          break
-        }
-      }
     }
+    #test whether the series is monotonically decreasing
+    is_valid <-  all(if_else(r_count <= lag(r_count), TRUE, FALSE), na.rm = TRUE)
+    # if decreasing, add the result to the data frame and increment rep counter
     if(is_valid){
       d_temp <- data.frame(day = d_jar$day,
                            raw_count = count, 
                            sim_count = r_count) %>%
-        mutate(jar_id = jar[i],
-               rep_id = n_rep)
+        mutate(jar_id = good_jars[i],
+               rep_id = rep_counter,
+               treatment = d_jar$treatment[1],
+               site = d_jar$treatment[1])
       d_sim <- rbind(d_sim, d_temp)
-      rep_counter = rep_counter + 1
+      #print rep counter to track progress
       print(paste("rep_counter", rep_counter))
+      rep_counter = rep_counter + 1
     }
   }
 }
 
+# plot the first 5 simulated series for all jars
+d_sim %>%
+  filter(rep_id <= 5) %>%
+  ggplot(aes(day, sim_count)) +
+  geom_line(aes(colour = as.factor(rep_id))) +
+  facet_wrap(vars(jar_id))
+
+#write simulated series to file
+d_sim %>%
+  arrange(jar_id, re, day) %>%
+  write_csv(here("output", "d_sim.csv"))
 
 
-
-#create simulted data
-#n_rep is the number of replicate trajectories
-n_rep <- 1000
-d_sim <- NULL
-for(i in 1:nrow(d_count)){
-  d_sim <- rbind(d_sim, data.frame(treatment = rep(d_count$treatment[i], n_rep),
-                                   jar_id = rep(d_count$jar_id[i], n_rep),
-                                   day = rep(d_count$day[i], n_rep),
-                                   site = rep(d_count$site[i], n_rep),
-                                   jar_count = r_jar(n_rep, d_count$count[i], d_jar_dist),
-                                   replicate = 1:n_rep))
-}
-##288,000 rows here
-##takes a while to run 
-View(d_sim)
-write.csv(d_sim, "d_sim.csv")
-
-#add the original sample counts to the dataframe so seen the input for the random draw
-#sort for viewing dataframe
-d_sim_sorted <- d_sim%>%
-  full_join(d_fake) %>%
-  arrange(jar_id, replicate, day)
-
-
-View(d_sim_sorted)
-write.csv(d_sim_sorted, "d_sim_sorted.csv")
-
-
-# plot the first three replicates from the 3 jars
-# problem is that most of the simulated series are not monotonically decreasing
-d_sim_sorted %>%
-  filter(replicate <= 3) %>%
-  ggplot(aes(day, jar_count)) +
-  geom_step(aes(colour = as.factor(replicate))) +
-  facet_wrap(vars(jar_id, replicate))
-
-
-
-#filter to find only data sets that are montonicaly decreasing
-# this is computationally a pretty inefficient way to do this, but relatively quick to to code
-d_sim_decreasing <- d_sim_sorted %>%
-  group_by(jar_id, replicate) %>%
-  mutate(is_decreasing = if_else(jar_count <= lag(jar_count), TRUE, FALSE)) %>%
-  mutate(is_decreasing = if_else(is.na(is_decreasing), TRUE, is_decreasing)) %>%
-  mutate(is_all_decreasing = all(is_decreasing)) %>%
-  filter(is_all_decreasing) %>%
-  ungroup() %>%
-  {.}
-
-#23,070 lines
-View(d_sim_decreasing)
-write.csv(d_sim_decreasing, "d_sim_decresing.csv")
-
-
-aggregate(is_decreasing~site+treatment+jar_id, data=d_sim_decreasing, length)
-
-
-#plot the decreasing series 
-#of the 300 series orginally created, not that many turn out to be monotonically decreasing
-d_sim_decreasing %>%
-  ggplot(aes(day, jar_count)) +
-  geom_step(aes(colour = as.factor(replicate)), show.legend = FALSE) +
-  facet_wrap(vars(jar_id, replicate))+
-  theme(legend.position = "none")
-
-ggsave("decresing_1000reps_nolegend.png")
-
-aggregate(o2consumption~sitedepth+Date+Treatment, data=Mussel_Temp, length)
+#I'm not sure what these aggeegate calls are doing?
+#aggregate(is_decreasing~site+treatment+jar_id, data=d_sim_decreasing, length)
+#aggregate(o2consumption~sitedepth+Date+Treatment, data=Mussel_Temp, length)
 
 #Number of days we counted per site/treatment
 #CI20- (5 days) 1,4,7,10,14
@@ -231,19 +195,6 @@ aggregate(o2consumption~sitedepth+Date+Treatment, data=Mussel_Temp, length)
 #=24 days*48 jars*500=576,000
 
 
-# example while loop
-
-
-# example while loop
-
-n_valid_rep <- 500
-valid_rep_counter <- 0
-while(valid_rep_counter < n_valid_rep) {
-  # make sim data to test if decreasing
-  if(decreasing == TRUE){ #test whether the data are decreaseing
-    #add valid data to the dataframe
-    valid_rep_counter <- valid_rep_counter + 1
-  }
   
 
 #Next steps on this.
