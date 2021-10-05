@@ -198,7 +198,12 @@ d_sim %>%
 #write simulated series to file
 d_sim %>%
   arrange(jar_id, rep_id, day) %>%
-  write_csv(here("output", "d_sim_pt_200.csv"))
+<<<<<<< HEAD
+  write_csv(here("output", "d_sim_pj_200.csv"))
+=======
+  write_csv(here("output", "d_sim_pj_300.csv"))
+
+>>>>>>> 56f736f33d9720df67d3df3c9a16d3ab3d43652f
 
 
 #Number of days we counted per site/treatment
