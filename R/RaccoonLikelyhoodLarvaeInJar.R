@@ -201,8 +201,8 @@ d_sim %>%
 
 #write simulated series to file
 d_sim %>%
-  arrange(jar_id, re, day) %>%
-  write_csv(here("output", "d_sim.csv"))
+  arrange(jar_id, rep_id, day) %>%
+  write_csv(here("output", "d_sim_pj_300.csv"))
 
 
 #I'm not sure what these aggeegate calls are doing?
