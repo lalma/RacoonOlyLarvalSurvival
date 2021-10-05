@@ -123,7 +123,6 @@ problem_jars <- d_count %>%
 
 good_jars <- all_jars[!(all_jars %in% problem_jars)]
 
-
 #problem jars=28 31 32 33 34 35 45 48
 #Jar 28- real variation. Had some samples with 9, 9, 9, 11, 14 larvae total per sample with a high number of live in each
 #Jar 31- had a single 1 ml sample where 18 were alive on day 10 which brought the count up
@@ -135,13 +134,10 @@ good_jars <- all_jars[!(all_jars %in% problem_jars)]
 #Jar 48- Not anything to explain here, thats just how the counts came out
 
 
-
-
-
 #Create simulated jar sample time series
 # n_rep = number of replicate series to create
 # This should be >=500 but 5 is engouhg to show how it works
-n_rep <- 5
+n_rep <- 200
 # empty frame to hold result
 d_sim <- NULL
 #pick which jars to run
@@ -201,13 +197,9 @@ d_sim %>%
 
 #write simulated series to file
 d_sim %>%
-  arrange(jar_id, re, day) %>%
-  write_csv(here("output", "d_sim.csv"))
+  arrange(jar_id, rep_id, day) %>%
+  write_csv(here("output", "d_sim_pt_200.csv"))
 
-
-#I'm not sure what these aggeegate calls are doing?
-#aggregate(is_decreasing~site+treatment+jar_id, data=d_sim_decreasing, length)
-#aggregate(o2consumption~sitedepth+Date+Treatment, data=Mussel_Temp, length)
 
 #Number of days we counted per site/treatment
 #CI20- (5 days) 1,4,7,10,14
