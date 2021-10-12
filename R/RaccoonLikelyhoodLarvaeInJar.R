@@ -7,6 +7,7 @@
 library(tidyverse)
 library(here)
 library(readxl)
+library(dplyr)
 
 #jar and sample volumes (ml)
 vol_jar <- 100 
@@ -105,6 +106,7 @@ data.frame(r0 = r_jar(100, 0, d_jar_dist),
 
 #read in the real data
 # count data for 6ml samples 
+#d_count <- read_excel("data/real data.xlsx") %>%
 d_count <- read_excel(here("data","real data.xlsx")) %>%
   arrange(jar_id, day) %>%
   group_by(jar_id) %>%
@@ -123,6 +125,7 @@ problem_jars <- d_count %>%
 
 good_jars <- all_jars[!(all_jars %in% problem_jars)]
 
+
 #problem jars=28 31 32 33 34 35 45 48
 #Jar 28- real variation. Had some samples with 9, 9, 9, 11, 14 larvae total per sample with a high number of live in each
 #Jar 31- had a single 1 ml sample where 18 were alive on day 10 which brought the count up
@@ -134,10 +137,13 @@ good_jars <- all_jars[!(all_jars %in% problem_jars)]
 #Jar 48- Not anything to explain here, thats just how the counts came out
 
 
+
+
+
 #Create simulated jar sample time series
 # n_rep = number of replicate series to create
 # This should be >=500 but 5 is engouhg to show how it works
-n_rep <- 200
+n_rep <- 5
 # empty frame to hold result
 d_sim <- NULL
 #pick which jars to run
@@ -197,13 +203,34 @@ d_sim %>%
 
 #write simulated series to file
 d_sim %>%
+  arrange(jar_id, re, day) %>%
+  write_csv(here("output", "d_sim.csv"))
+
+
+# plot the first 5 simulated series for all jars
+d_sim %>%
+  filter(rep_id <= 5) %>%
+  ggplot(aes(day, sim_count)) +
+  geom_line(aes(colour = as.factor(rep_id))) +
+  facet_wrap(vars(jar_id))
+
+#write simulated series to file
+d_sim %>%
   arrange(jar_id, rep_id, day) %>%
 <<<<<<< HEAD
   write_csv(here("output", "d_sim_pj_200.csv"))
 =======
   write_csv(here("output", "d_sim_pj_300.csv"))
 
->>>>>>> 56f736f33d9720df67d3df3c9a16d3ab3d43652f
+  #number of days counted
+  #CI20-5
+  #CI5- 6
+  #DB-7
+  #PW-6
+  
+
+
+  
 
 
 #Number of days we counted per site/treatment
@@ -212,6 +239,12 @@ d_sim %>%
 #DB- (7 days) 1,3,5,7,10,12,14
 #PW- (6 days) 1,4,7,10,12,14
 #=24 days*48 jars*500=576,000
+  
+#number of days counted
+#CI20-5
+#CI5- 6
+#DB-7
+#PW-6
 
 
   
