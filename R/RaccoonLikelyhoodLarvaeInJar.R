@@ -246,9 +246,45 @@ d_sim %>%
 #DB-7
 #PW-6
 
-
   
+#####
+# expansion of jar total counts to individual for survival analysis
 
+# read in simulated data
+#example is just on one jar - need to loop through all reps of all the jars
+ d <- read_csv(here("output", "d_sim_pj_300.csv")) %>%
+    filter(jar_id == 31, rep_id == 1) %>%
+    arrange(jar_id, rep_id, day)
+
+#create a data frame for the expanded data
+#populate day and status with default assumptoin that they are alive at the last sample day
+  d_expand <- data.frame(jar_id =rep(d$jar_id[1], d$sim_count[1])) %>%
+    mutate(rep_id = d$rep_id[1], 
+           treatment = d$treatment[1], 
+           site = d$site[1], 
+           day = d$day[nrow(d)],
+           status = 0)
+  #loop through all the days, assigining status = 1 and day to the right number of individuals
+  # dead_index and new_dead help make sure you change the correct row for status and day
+  # any thing that didn't die remains right sensored (status = 0 on last day)
+  dead_index <- 1
+  for(i in 2:nrow(d)){
+    new_dead <- d$sim_count[i-1] - d$sim_count[i]
+    d_expand$day[dead_index:(dead_index+new_dead)] <- d$day[i]
+    d_expand$status[dead_index:(dead_index+new_dead)] <- 1
+    dead_index <- dead_index + new_dead
+  }
+
+# use a frequency table to check that the example worked.
+# this shows that the last count is off by one.
+# I'll leave it to you to fix that...
+  lag(d$sim_count) - d$sim_count  
+  table(d_expand$day, d_expand$status)
+  
+  
+  
+  
+  
 #Next steps on this.
 # simulate a 1000 valid (monotoncially decreasing) time series of counts for each jar
 # The above code makes valid series, but need to modify it so you get a 1000 for each jar of the real data
