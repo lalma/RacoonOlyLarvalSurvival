@@ -255,6 +255,7 @@ d_sim %>%
  d <- read_csv(here("output", "d_sim_pj_300.csv")) %>%
     filter(jar_id == 31, rep_id == 1) %>%
     arrange(jar_id, rep_id, day)
+View(d)
 
 #create a data frame for the expanded data
 #populate day and status with default assumptoin that they are alive at the last sample day
@@ -264,9 +265,11 @@ d_sim %>%
            site = d$site[1], 
            day = d$day[nrow(d)],
            status = 0)
-  #loop through all the days, assigining status = 1 and day to the right number of individuals
+  
+View(d_expand)
+  #loop through all the days, assigning status = 1 and day to the right number of individuals
   # dead_index and new_dead help make sure you change the correct row for status and day
-  # any thing that didn't die remains right sensored (status = 0 on last day)
+  # any thing that didn't die remains right censored (status = 0 on last day)
   dead_index <- 1
   for(i in 2:nrow(d)){
     new_dead <- d$sim_count[i-1] - d$sim_count[i]
@@ -274,14 +277,20 @@ d_sim %>%
     d_expand$status[dead_index:(dead_index+new_dead)] <- 1
     dead_index <- dead_index + new_dead
   }
-
+  
+View(dead_index)
+View(new_dead)
 # use a frequency table to check that the example worked.
 # this shows that the last count is off by one.
 # I'll leave it to you to fix that...
   lag(d$sim_count) - d$sim_count  
   table(d_expand$day, d_expand$status)
+View(d_expand)
+write_csv(here("output", "d_expand.csv"))
   
-  
+#Notes
+#282 alive at the end of the experiment
+
   
   
   
