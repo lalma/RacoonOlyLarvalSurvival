@@ -252,14 +252,15 @@ d_sim %>%
 
 # read in simulated data
 #example is just on one jar - need to loop through all reps of all the jars
- d <- read_csv(here("output", "d_sim_pj_300.csv")) %>%
+
+d <- read_csv(here("output", "d_sim_pj_300.csv")) %>%
     filter(jar_id == 31, rep_id == 1) %>%
     arrange(jar_id, rep_id, day)
 View(d)
 
 #create a data frame for the expanded data
 #populate day and status with default assumptoin that they are alive at the last sample day
-  d_expand <- data.frame(jar_id =rep(d$jar_id[1], d$sim_count[1])) %>%
+d_expand <- data.frame(jar_id =rep(d$jar_id[1], d$sim_count[1])) %>%
     mutate(rep_id = d$rep_id[1], 
            treatment = d$treatment[1], 
            site = d$site[1], 
@@ -285,11 +286,19 @@ View(new_dead)
 # I'll leave it to you to fix that...
   lag(d$sim_count) - d$sim_count  
   table(d_expand$day, d_expand$status)
-View(d_expand)
-write_csv(here("output", "d_expand.csv"))
-  
+
+
+
+write.csv(d_expand, file = "output/d_expand.csv")
+
+
+
 #Notes
-#282 alive at the end of the experiment
+#282 0s in the dataset, #551 1s in the dataset =833
+#the table shows that on day 14 we had 282 left, and 23 died, but its supposed to be 283 left and 22 died - so somehow, we need to change one 1 into a 0
+#we also want to change the day of all those whos status == 0 from 14 to 15
+#from there we want to run the code on the whole dataset - 48 jars and 500 reps each
+
 
   
   
