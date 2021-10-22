@@ -268,11 +268,12 @@ d_expand <- data.frame(jar_id =rep(d$jar_id[1], d$sim_count[1])) %>%
            status = 0)
   
 View(d_expand)
-  #loop through all the days, assigning status = 1 and day to the right number of individuals
-  # dead_index and new_dead help make sure you change the correct row for status and day
-  # any thing that didn't die remains right censored (status = 0 on last day)
-  dead_index <- 1
-  for(i in 2:nrow(d)){
+
+#loop through all the days, assigning status = 1 and day to the right number of individuals
+# dead_index and new_dead help make sure you change the correct row for status and day
+# any thing that didn't die remains right censored (status = 0 on last day)
+dead_index <- 1
+for(i in 2:nrow(d)){
     new_dead <- d$sim_count[i-1] - d$sim_count[i]
     d_expand$day[dead_index:(dead_index+new_dead)] <- d$day[i]
     d_expand$status[dead_index:(dead_index+new_dead)] <- 1
@@ -284,8 +285,8 @@ View(new_dead)
 # use a frequency table to check that the example worked.
 # this shows that the last count is off by one.
 # I'll leave it to you to fix that...
-  lag(d$sim_count) - d$sim_count  
-  table(d_expand$day, d_expand$status)
+lag(d$sim_count) - d$sim_count  
+table(d_expand$day, d_expand$status)
 
 
 
